@@ -1,7 +1,8 @@
 package com.alura.literalura.principal;
 
-import com.alura.literalura.model.Datos;
-import com.alura.literalura.model.DatosLibro;
+import com.alura.literalura.model.*;
+import com.alura.literalura.repository.AutorRepository;
+import com.alura.literalura.repository.LibroRepository;
 import com.alura.literalura.service.ConsumoAPI;
 import com.alura.literalura.service.ConvertirDatos;
 
@@ -13,6 +14,16 @@ public class Principal {
     private ConsumoAPI consumoApi = new ConsumoAPI();
     private ConvertirDatos conversor = new ConvertirDatos();
     private final String URL_BASE = "https://gutendex.com/books/";
+
+
+    private LibroRepository repositorio;
+    private AutorRepository autorRepositorio;
+
+    public Principal(LibroRepository repository, AutorRepository autorRepository) {
+        this.repositorio = repository;
+        this.autorRepositorio = autorRepository;
+    }
+
 
     public void muestraElMenu() {
         var opcion = -1;
@@ -53,20 +64,30 @@ public class Principal {
                 .findFirst();
 
         if (libroBuscado.isPresent()) {
-            var libro = libroBuscado.get(); // Sacamos el libro del Optional
-            System.out.println("\n---------- LIBRO ENCONTRADO ----------");
-            System.out.println("Título: " + libro.titulo());
-            System.out.println("Autor: " + libro.autores().stream()
-                    .map(a -> a.nombre()).findFirst().orElse("Desconocido"));
-            System.out.println("Idioma: " + (libro.idiomas() == null || libro.idiomas().isEmpty()
-                    ? "Desconocido"
-                    : libro.idiomas().get(0)));
-            System.out.println("Número de descargas: " + libro.numeroDeDescargas());
-            System.out.println("--------------------------------------\n");
-        } else {
-            System.out.println("Libro no encontrado");
+            DatosLibro datosLibro = libroBuscado.get();
+
+
+            DatosAutor datosAutor = datosLibro.autores().get(0);
+            Autor autor = autorRepositorio.findByNombreContainsIgnoreCase(datosAutor.nombre())
+                    .orElseGet(() -> {
+                        // Si el autor no existe, lo creamos y guardamos
+                        Autor nuevoAutor = new Autor(datosAutor);
+                        return autorRepositorio.save(nuevoAutor);
+                    });
+
+
+            Libro libro = new Libro(datosLibro);
+            libro.setAutor(autor);
+
+
+            repositorio.save(libro);
+
+            System.out.println("----- LIBRO REGISTRADO CON ÉXITO -----");
+            System.out.println(libro);
         }
     }
 }
+
+
 
 
