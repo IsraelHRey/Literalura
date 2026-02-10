@@ -1,6 +1,7 @@
 package com.alura.literalura;
 
 import com.alura.literalura.model.Datos;
+import com.alura.literalura.principal.Principal;
 import com.alura.literalura.service.ConsumoAPI;
 import com.alura.literalura.service.ConvertirDatos;
 import org.springframework.boot.CommandLineRunner;
@@ -17,16 +18,8 @@ public class LiteraluraApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-
-        ConsumoAPI consumoApi = new ConsumoAPI();
-        var json = consumoApi.obtenerDatos("https://gutendex.com/books/");
-        System.out.println(json);
-
-
-        ConvertirDatos conversor = new ConvertirDatos();
-        var datos = conversor.obtenerDatos(json, Datos.class);
-        System.out.println(datos);
-
+        Principal principal = new Principal();
+        principal.muestraElMenu();
     }
 }
 
