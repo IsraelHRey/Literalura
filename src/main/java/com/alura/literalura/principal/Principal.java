@@ -6,8 +6,7 @@ import com.alura.literalura.repository.LibroRepository;
 import com.alura.literalura.service.ConsumoAPI;
 import com.alura.literalura.service.ConvertirDatos;
 
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
 public class Principal {
     private Scanner lectura = new Scanner(System.in);
@@ -45,6 +44,18 @@ public class Principal {
                 case 1:
                     buscarLibroPorTitulo();
                     break;
+                case 2:
+                    listarLibrosRegistrados();
+                    break;
+                case 3:
+                    listarAutoresRegistrados();
+                    break;
+                case 4:
+                    listarAutoresVivosEnAnio();
+                    break;
+                case 5:
+                    listarLibrosPorIdioma();
+                    break;
                 case 0:
                     System.out.println("Cerrando la aplicación...");
                     break;
@@ -70,7 +81,7 @@ public class Principal {
             DatosAutor datosAutor = datosLibro.autores().get(0);
             Autor autor = autorRepositorio.findByNombreContainsIgnoreCase(datosAutor.nombre())
                     .orElseGet(() -> {
-                        // Si el autor no existe, lo creamos y guardamos
+
                         Autor nuevoAutor = new Autor(datosAutor);
                         return autorRepositorio.save(nuevoAutor);
                     });
@@ -84,6 +95,79 @@ public class Principal {
 
             System.out.println("----- LIBRO REGISTRADO CON ÉXITO -----");
             System.out.println(libro);
+        }
+    }
+
+    private void listarLibrosRegistrados() {
+
+        List<Libro> libros = repositorio.findAll();
+
+
+        if (libros.isEmpty()) {
+            System.out.println("No se encontraron libros registrados.");
+        } else {
+
+            libros.stream()
+                    .sorted(Comparator.comparing(Libro::getTitulo))
+                    .forEach(System.out::println);
+        }
+    }
+
+    private void listarAutoresRegistrados() {
+        List<Autor> autores = autorRepositorio.findAll();
+
+        if (autores.isEmpty()) {
+            System.out.println("No hay autores registrados.");
+        } else {
+            autores.stream()
+                    .sorted(Comparator.comparing(Autor::getNombre))
+                    .forEach(System.out::println);
+        }
+    }
+
+    private void listarAutoresVivosEnAnio() {
+        System.out.println("Ingresa el año que deseas buscar:");
+        try {
+            var anio = lectura.nextInt();
+            lectura.nextLine();
+
+            List<Autor> autores = autorRepositorio.autoresVivosEnDeterminadoAnio(anio);
+
+            if (autores.isEmpty()) {
+                System.out.println("No se encontraron autores vivos en el año " + anio);
+            } else {
+                autores.forEach(System.out::println);
+            }
+        } catch (InputMismatchException e) {
+
+            System.out.println("Error: Debes ingresar un número válido para el año.");
+            lectura.nextLine();
+        }
+    }
+
+    private void listarLibrosPorIdioma() {
+        System.out.println("""
+            Ingrese el idioma para buscar los libros:
+            es - español
+            en - inglés
+            fr - francés
+            pt - portugués
+            """);
+        var idioma = lectura.nextLine();
+
+        List<Libro> libros = repositorio.findByIdioma(idioma);
+
+        if (libros.isEmpty()) {
+            System.out.println("No se encontraron libros en ese idioma en la base de datos.");
+        } else {
+
+            libros.forEach(System.out::println);
+
+
+            long cantidad = libros.stream().count();
+            System.out.println("-------------------------------------------");
+            System.out.println("Cantidad de libros encontrados: " + cantidad);
+            System.out.println("-------------------------------------------\n");
         }
     }
 }

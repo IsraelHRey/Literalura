@@ -71,4 +71,12 @@ public class Autor {
     public void setLibros(List<Libro> libros) {
         this.libros = libros;
     }
+
+
+    @Override
+    public String toString() {
+        return "Autor: " + nombre + "\n" +
+                "Fecha de nacimiento: " + fechaDeNacimiento + "\n" +
+                "Fecha de fallecimiento: " + (fechaDeFallecimiento != null ? fechaDeFallecimiento : "N/A") + "\n";
+    }
 }
